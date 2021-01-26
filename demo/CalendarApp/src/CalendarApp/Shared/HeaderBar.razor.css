@@ -1,0 +1,40 @@
+.headerbar {
+    height: var(--header-height);
+}
+
+nav {
+    overflow: hidden;
+    color: white;
+    background-color: #202020;
+}
+
+::deep a.active {
+    color: white;
+    background: #444;
+}
+
+.title {
+    line-height: 1.1rem;
+    font-size: 1.3rem;
+    font-weight: 400;
+    padding-left: 0.75rem;
+}
+
+.hamburger {
+    background-color: #3C3C3C;
+    color: var(--theme-color);
+    opacity: 0.8;
+}
+
+.hamburger:hover {
+    opacity: 1;
+}
+
+.logo {
+    color: var(--theme-color);
+    height: 3rem;
+}
+
+::deep label {
+    background: none;
+}

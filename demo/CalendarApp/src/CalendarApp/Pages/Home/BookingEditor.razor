@@ -1,0 +1,123 @@
+@inject CalendarDataService CalendarData
+
+@if (Booking != null)
+{
+    <div class="overlay pl-14">
+        <EditForm Model="Booking" class="page px-8 py-2" OnValidSubmit="@(() => OnSave.InvokeAsync(Booking))">
+            <FormField Label="Date">            
+                <input type="date" @bind="SelectedDate" @bind:event="oninput"></input>
+                <ValidationMessage For="() => Booking.StartTime"></ValidationMessage>
+            </FormField>
+
+            <FormField Label="Time & Room">
+                @if (availableSlots != null)
+                {
+                    <select @bind="SelectedTimeAndRoom">
+                        <option value="@FormatTimeAndRoom(default, default)">Select...</option>
+                        @foreach (var slot in availableSlots)
+                        {
+                            <option value="@($"{slot.Item1.Id}:{slot.Item2}")">
+                                @Booking.HourLabel(slot.Item2) - @slot.Item1.Name
+                            </option>
+                        }
+                    </select>
+                    <div class="absolute inset-y-0 right-0 flex items-center px-2 pointer-events-none">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+                    </div>
+                }
+                <ValidationMessage For="() => Booking.RoomId"></ValidationMessage>
+            </FormField>
+
+            <FormField Label="Customer name">
+                <InputText placeholder="customer name" @bind-Value="Booking.Name"></InputText>
+                <ValidationMessage For="() => Booking.Name"></ValidationMessage>
+            </FormField>
+
+            <FormField Label="Appointment reason">
+                <InputTextArea placeholder="appointment reason" @bind-Value="Booking.Notes"></InputTextArea>
+                <ValidationMessage For="() => Booking.Notes"></ValidationMessage>
+            </FormField>
+
+            
+            <button type="submit" class="w-full py-3 mt-8 bg-gray-800 rounded-sm font-medium text-white uppercase focus:outline-none hover:bg-gray-700 hover:shadow-none">
+                Save
+            </button>
+            <div class="text-gray-500 my-2 text-center">
+                <a href class="underline" @onclick="Cancel" @onclick:preventDefault>Cancel</a>
+            </div>
+
+            <DataAnnotationsValidator></DataAnnotationsValidator>
+        </EditForm>
+    </div>
+}
+
+@code {
+    private DateTime? selectedDate;
+    private (Room, int)[] availableSlots;
+
+    [Parameter] public Booking Booking { get; set; }
+
+    [Parameter] public EventCallback<Booking> OnSave { get; set; }
+
+    [Parameter] public EventCallback OnCancel { get; set; }
+
+    Task Cancel() => OnCancel.InvokeAsync();
+
+    protected override void OnParametersSet()
+    {
+        selectedDate = Booking != null ? Booking.StartTime.Date : null;
+        _ = RefreshAvailableSlots();
+    }
+    
+    private DateTime? SelectedDate
+    {
+        get => selectedDate;
+        set
+        {
+            selectedDate = value;
+            Booking.RoomId = 0;
+            Booking.StartTime = default;
+            _ = RefreshAvailableSlots();
+        }
+    }
+
+    private string SelectedTimeAndRoom
+    {
+        get => Booking == null ? null : FormatTimeAndRoom(Booking.RoomId, Booking.StartTime);
+        set
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                Booking.RoomId = default;
+            }
+            else
+            {
+                var tokens = value.Split(':');
+                Booking.RoomId = int.Parse(tokens[0]);
+                Booking.StartTime = SelectedDate.Value.AddHours(int.Parse(tokens[1]));
+            }
+        }
+    }
+
+    private string FormatTimeAndRoom(int roomId, DateTime startTime)
+        => $"{roomId}:{startTime.Hour}";
+
+    private async Task RefreshAvailableSlots()
+    {
+        try
+        {
+            availableSlots = null;
+            StateHasChanged();
+
+            if (selectedDate.HasValue)
+            {
+                availableSlots = await CalendarData.GetAvailableSlots(selectedDate.Value, Booking);
+                StateHasChanged();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+    }
+}

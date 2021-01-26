@@ -1,0 +1,71 @@
+@inherits TestComponentBase
+@using CalendarApp.Pages.Home
+
+<Fixture Test="RendersMinimumDate">
+    <ComponentUnderTest>
+        <DatePickerButton Min="@minDate" />
+    </ComponentUnderTest>
+</Fixture>
+
+<Fixture Test="WhenChanged_InvokesOnDatePicked">
+    <ComponentUnderTest>
+        <DatePickerButton
+            Min="@minDate" 
+            OnDatePicked="@(date => { receivedDate = date; })" />
+    </ComponentUnderTest>
+</Fixture>
+
+<Fixture Test="RejectsEntryBeforeMinumumDate">
+    <ComponentUnderTest>
+        <DatePickerButton Min="@minDate" />
+    </ComponentUnderTest>
+</Fixture>
+
+@code
+{
+    DateTime minDate = DateTime.Now.Date.AddDays(-5); // Arbitrary date
+    DateTime receivedDate;
+
+    void RendersMinimumDate(Fixture fixture)
+    {
+        // Arrange/Act
+        var rendered = fixture.GetComponentUnderTest<DatePickerButton>();
+
+        // Assert
+        var renderedMinDate = rendered
+            .Find("input[type=date]")
+            .GetAttribute("min");
+
+        Assert.Equal(
+            minDate.ToString("yyyy-MM-dd"),
+            renderedMinDate);
+    }
+
+    void WhenChanged_InvokesOnDatePicked(Fixture fixture)
+    {
+        // Arrange
+        var testDate = DateTime.Now.AddDays(10).Date;
+        var inputElement = fixture
+            .GetComponentUnderTest<DatePickerButton>()
+            .Find("input[type=date]");
+    
+        // Act
+        inputElement.Change(testDate.ToString("yyyy-MM-dd"));
+    
+        // Assert
+        Assert.Equal(testDate, receivedDate);
+    }
+
+    void RejectsEntryBeforeMinumumDate(Fixture fixture)
+    {
+        // Arrange
+        var illegalDate = minDate.AddDays(-1);
+        var inputElement = fixture
+            .GetComponentUnderTest<DatePickerButton>()
+            .Find("input[type=date]");
+    
+        // Act/Assert
+        Assert.Throws<ArgumentOutOfRangeException>(() =>
+            inputElement.Change(illegalDate.ToString("yyyy-MM-dd")));
+    }
+}

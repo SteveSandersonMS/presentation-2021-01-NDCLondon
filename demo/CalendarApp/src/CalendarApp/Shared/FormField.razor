@@ -1,0 +1,11 @@
+<label>
+    <div class="mt-10 text-xs font-semibold text-gray-600 uppercase">@Label</div>
+    <div class="relative">
+        @ChildContent
+    </div>
+</label>
+
+@code {
+    [Parameter] public string Label { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+}

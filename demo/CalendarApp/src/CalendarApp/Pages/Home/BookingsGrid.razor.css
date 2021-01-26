@@ -1,0 +1,81 @@
+.date-header {
+    top: var(--header-height);
+    background-color: var(--theme-color);
+    color: black;
+    position: sticky;
+    height: 2.85rem;
+    padding: .6rem 1rem;
+    font-size: 1.2rem;
+    text-align: right;
+    border-bottom: 1px solid #444;
+}
+
+.date-header:not(:first-of-type) {
+    box-shadow: 0rem -0.3rem 0.4rem rgba(0,0,0,0.3);
+}
+
+.day-grid {
+    display: grid;
+    grid-template-columns: 4.5rem minmax(0, 1fr) minmax(0, 1fr);
+    box-shadow: 0 0.3rem 0.75rem rgba(0,0,0,0.2);
+    color: white;
+    margin-bottom: calc(0.23rem + 40px)
+}
+
+.grid-header {
+    background-color: white;
+    color: #666;
+    min-height: 2rem;
+}
+
+.day-grid ::deep > div:first-of-type {
+    background-color: #ddd;
+}
+
+.day-grid ::deep > div {
+    padding: 0.4rem 0.6rem 0.4rem 0.8rem;
+    border: 0.5px solid rgba(0,0,0,0.2);
+    border-bottom: none;
+    border-left: none;
+}
+
+.name {
+    font-weight: 400;
+}
+
+.reason {
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.slot {
+    background-color: #A09D9D;
+    border-color: rgba(255,255,255,0.2) !important;
+    height: 3.7rem;
+    display: flex;
+    padding: 0.1rem 0.15rem !important;
+    line-height: 1.2rem;
+    font-size: 0.9rem;
+}
+
+.dragme {
+    background-color: var(--theme-color);
+    color: black;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    cursor: move;
+    user-select: none;
+    border-bottom: 1px solid #444;
+    font-size: 1.05rem;
+}
+
+.dragme > div {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.dragme:hover {
+    background-color: #ecda9e;
+        
+}

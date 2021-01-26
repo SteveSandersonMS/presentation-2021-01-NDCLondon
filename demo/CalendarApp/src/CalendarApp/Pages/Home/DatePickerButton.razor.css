@@ -1,0 +1,46 @@
+label {
+    position: relative;
+    border-radius: 1.5rem;
+    text-align: center;
+    color: white;
+    display: inline-flex;
+    align-items: center;
+    opacity: 0.6;
+    background-color: rgba(0,0,0,0.4);
+    padding: 0.1rem 0.8rem;
+    margin-left: auto;
+    margin-bottom: 0.1rem;
+}
+
+.icon {
+    height: 1rem;
+    width: 1rem;
+    display: inline;
+}
+
+.caption {
+    margin: 0px 0.2rem 0 0.4rem;
+    font-size: 1.1rem;
+}
+
+label:hover {
+    opacity: 1;
+}
+
+input[type="date"] {
+    width: 0px;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    background: transparent;
+    color: transparent;
+    cursor: pointer;
+    margin-left: 0;
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+}

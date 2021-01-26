@@ -1,0 +1,96 @@
+@page "/"
+@inject IJSRuntime JS
+@inject CalendarDataService CalendarData
+@implements IAsyncDisposable
+
+<SectionContent Name="header-stuff">
+    <DatePickerButton Min="@DateTime.Now" OnDatePicked="@ScrollToDate" />
+</SectionContent>
+
+<ErrorBoundary>
+    <div @ref="calendarElement">
+        @if (rooms != null)
+        {
+            <Virtualize Items="dates" Context="date" ItemSize="600">
+                <BookingsGrid Date="@date" Rooms="@rooms" OnEdit="@EditEntry"></BookingsGrid>
+            </Virtualize>
+        }
+    </div>
+</ErrorBoundary>
+
+<BookingEditor Booking="@editingBooking" OnSave="HandleSave" OnCancel="HandleCancel" />
+
+@code {
+    private Room[] rooms;
+    private Booking editingBooking;
+    private ElementReference calendarElement;
+    private IJSObjectReference module;
+    private DotNetObjectReference<Home> selfReference;
+    private List<DateTime> dates = Enumerable.Range(0, 200).Select(x => DateTime.UtcNow.Date.AddDays(x)).ToList();
+
+    protected override async Task OnInitializedAsync()
+    {
+        rooms = await CalendarData.GetRoomsAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            selfReference = DotNetObjectReference.Create(this);
+            module = await JS.InvokeAsync<IJSObjectReference>(
+                "import", "./calendar-drag.js");
+            
+            await module.InvokeVoidAsync("enableDragDrop", calendarElement, selfReference);
+        }
+    }
+
+    [JSInvokable]
+    public async Task HandleMove(int entryId, int toRoomId, DateTime toDateTime)
+    {
+        await CalendarData.MoveBookingAsync(entryId, toRoomId, toDateTime);
+    }
+
+    public void EditEntry(Booking entry)
+    {
+        editingBooking = entry;
+    }
+
+    public async Task HandleSave(Booking entry)
+    {
+        await CalendarData.SaveBookingAsync(entry);
+        editingBooking = null;
+    }
+
+    public void HandleCancel()
+    {
+        editingBooking = null;
+    }
+
+    async Task ScrollToDate(DateTime date)
+    {
+        var entryIndex = dates.IndexOf(date.Date);
+        if (entryIndex >= 0)
+        {
+            // First, dynamically load the JS module if needed
+            await using var scrollerModule = await JS.InvokeAsync<IJSObjectReference>(
+                "import", "./scroller.js");
+            
+            // Second, invoke one of its exports
+            await scrollerModule.InvokeVoidAsync("scrollTo", calendarElement, (double)entryIndex / dates.Count);
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (selfReference != null)
+        {
+            selfReference.Dispose();
+        }
+
+        if (module != null)
+        {
+            await module.DisposeAsync();
+        }
+    }
+}

@@ -1,0 +1,42 @@
+::deep input, ::deep select, ::deep textarea {
+    padding: 0.5rem 0;
+    display: block;
+    width: 100%;
+    margin-top: 0.3rem;
+    color: rgba(107,114,128);
+    border-bottom-width: 0.125rem;
+    --tw-border-opacity: 1;
+    border-color: rgba(229,231,235,1);
+    --tw-text-opacity: 1;
+}
+
+::deep select {
+    appearance: none;
+    padding-left: 0.75rem;
+}
+
+::deep textarea {
+    height: 5rem;
+}
+
+::deep input:focus, ::deep select:focus, ::deep textarea:focus {
+    color: rgba(107,114,128);
+    outline: 0.125rem solid transparent;
+    outline-offset: 0.125rem;
+    --tw-border-opacity: 1;
+    border-color: rgb(194, 193, 193);
+}
+
+::deep .valid.modified {
+    border-color: rgb(7, 170, 7);
+    outline: none;
+}
+
+::deep .validation-message {
+    margin-top: 0.4rem;
+}
+
+::deep .invalid {
+    outline: none;
+    border-color: red;
+}

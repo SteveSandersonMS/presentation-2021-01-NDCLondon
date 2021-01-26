@@ -1,0 +1,51 @@
+@inject CalendarDataService CalendarData
+
+<h3 class="date-header">@Date.ToString("dddd, MMMM dd")</h3>
+
+<div class="day-zone">
+    <div class="day-grid">
+        <div></div>
+        @foreach (var room in Rooms)
+        {
+            <div class="grid-header">@room.Name</div>
+        }
+    
+        @for (var hour = 9; hour <= 16; hour += 1)
+        {
+            <div class="text-right pr-3 grid-header">
+                @Booking.HourLabel(hour)
+            </div>
+        
+            @foreach (var room in Rooms)
+            {
+                var booking = FindBooking(hour, room);
+
+                <div class="slot" data-slot-room-id="@room.Id" data-slot-datetime="@(Date.AddHours(hour).ToUniversalTime().ToString("o"))">
+                    @if (booking != null)
+                    {
+                        <div data-booking-id="@booking.Id" class="dragme" @onclick="@(() => OnEdit.InvokeAsync(booking))">
+                            <div class="name">@booking.Name</div>
+                            <div class="reason">@booking.Notes</div>
+                        </div>
+                    }
+                </div>
+            }
+        }
+    </div>
+</div>
+
+@code {
+    Booking[] bookings;
+
+    [Parameter] public DateTime Date { get; set; }
+    [Parameter] public Room[] Rooms { get; set; }
+    [Parameter] public EventCallback<Booking> OnEdit { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        bookings = await CalendarData.GetBookingsAsync(Date);
+    }
+
+    Booking FindBooking(int hour, Room room)
+        => bookings?.FirstOrDefault(e => e.RoomId == room.Id && e.StartTime.Hour == hour);
+}

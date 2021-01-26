@@ -1,0 +1,24 @@
+<label>
+    <svg class="icon" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="#ffffff" d="m13.05673,11.36248l-0.93775,0c1.12268,-1.16821 1.81641,-2.75183 1.81641,-4.5c0,-3.58985 -2.91016,-6.5 -6.5,-6.5s-6.5,2.91015 -6.5,6.5s2.91016,6.5 6.5,6.5c1.28998,0 2.48901,-0.38049 3.5,-1.02857l0,1.14991l5.30328,5.30328l2.12134,-2.12134l-5.30328,-5.30328zm-5.62134,0c-2.48132,0 -4.5,-2.01868 -4.5,-4.5s2.01868,-4.5 4.5,-4.5s4.5,2.01868 4.5,4.5s-2.01868,4.5 -4.5,4.5z"/></svg>
+    <!--<div class="caption">Date</div>-->
+    <input type="date" min="@minString" @onchange="HandleDatePicked" />
+</label>
+
+@code {
+    private string minString => Min.ToString("yyyy-MM-dd");
+
+    [Parameter] public DateTime Min { get; set; }
+    [Parameter] public EventCallback<DateTime> OnDatePicked { get; set; }
+
+    async Task HandleDatePicked(ChangeEventArgs eventArgs)
+    {
+        var value = DateTime.Parse((string)eventArgs.Value);
+
+        if (value < Min)
+        {
+            throw new ArgumentOutOfRangeException("Date cannot be before min");
+        }
+
+        await OnDatePicked.InvokeAsync(value);
+    }
+}
